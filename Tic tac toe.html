@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General styling for the body and fonts */
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Purple and pink background */
+            background: linear-gradient(135deg, #4a148c, #880e4f);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Container for the entire game */
+        .game-container {
+            text-align: center;
+            background-color: #6a1b9a;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4),
+                        0 5px 15px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            width: 400px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #fce4ec;
+            margin-bottom: 1rem;
+        }
+
+        /* Score dashboard styling */
+        .score-dashboard {
+            display: flex;
+            justify-content: space-around;
+            background-color: #7b1fa2;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .score-item {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #d1d1d1;
+            text-align: center;
+        }
+
+        .score-item span {
+            display: block;
+            font-size: 1.8rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Specific score colors */
+        #x-score-val { color: #f06292; } /* Vibrant pink */
+        #o-score-val { color: #ce93d8; } /* Light purple */
+
+        /* Status message for game state */
+        #status-message {
+            font-size: 1.5rem;
+            margin: 1.5rem 0;
+            font-weight: bold;
+            color: #fce4ec;
+        }
+
+        /* Styling for the Tic-Tac-Toe board grid */
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        /* Styling for each cell on the board */
+        .cell {
+            background-color: #9c27b0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 15px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.3),
+                        0 2px 4px rgba(0, 0, 0, 0.2);
+            aspect-ratio: 1 / 1;
+        }
+
+        .cell:hover {
+            transform: translateY(-3px);
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.4),
+                        0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Specific colors for X and O */
+        .cell.x {
+            color: #f06292; /* Vibrant pink */
+        }
+
+        .cell.o {
+            color: #ce93d8; /* Light purple */
+        }
+
+        /* Button container for layout */
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2.5rem;
+        }
+
+        /* General button styling */
+        .game-button {
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            color: #fff;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Specific styles for the reset button */
+        .reset-button {
+            background-color: #c2185b; /* Deep pink for contrast */
+        }
+
+        .reset-button:hover {
+            background-color: #ad1457;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Specific styles for the AI toggle button */
+        .ai-toggle-button {
+            background-color: #880e4f; /* A rich plum color */
+        }
+        
+        .ai-toggle-button:hover {
+            background-color: #7b0d46;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Media queries for smaller screens */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            #status-message {
+                font-size: 1.25rem;
+            }
+
+            .cell {
+                font-size: 2.5rem;
+            }
+
+            .game-button {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Tic-Tac-Toe</h1>
+        <div class="score-dashboard">
+            <div class="score-item">
+                Adrija Wins: <span id="x-score-val">0</span>
+            </div>
+            <div class="score-item">
+                O Wins: <span id="o-score-val">0</span>
+            </div>
+            <div class="score-item">
+                Draws: <span id="draws-score-val">0</span>
+            </div>
+        </div>
+        <div id="status-message"></div>
+        <div class="game-board" id="game-board">
+            <!-- Cells will be generated by JavaScript -->
+        </div>
+        <div class="button-container">
+            <button class="game-button reset-button" id="reset-button">Restart Game</button>
+            <button class="game-button ai-toggle-button" id="ai-toggle-button">Play Against AI</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Game Logic ---
+        const board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let isAiPlaying = false; // New variable to track if AI mode is active
+
+        // Score tracking variables
+        let xWins = 0;
+        let oWins = 0;
+        let draws = 0;
+
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        // DOM elements
+        const cellsContainer = document.getElementById('game-board');
+        const statusMessage = document.getElementById('status-message');
+        const resetButton = document.getElementById('reset-button');
+        const aiToggleButton = document.getElementById('ai-toggle-button');
+        const xScoreEl = document.getElementById('x-score-val');
+        const oScoreEl = document.getElementById('o-score-val');
+        const drawsScoreEl = document.getElementById('draws-score-val');
+
+        // Initial setup and event listeners
+        window.onload = function() {
+            // Create cells dynamically
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.setAttribute('data-index', i);
+                cell.addEventListener('click', handleCellClick);
+                cellsContainer.appendChild(cell);
+            }
+            updateStatusMessage(`Adrija's turn`);
+            resetButton.addEventListener('click', handleReset);
+            aiToggleButton.addEventListener('click', handleAiToggle);
+            updateScores();
+        }
+
+        // Updates the score dashboard
+        function updateScores() {
+            xScoreEl.textContent = xWins;
+            oScoreEl.textContent = oWins;
+            drawsScoreEl.textContent = draws;
+        }
+
+        // Toggles between player vs player and player vs AI
+        function handleAiToggle() {
+            isAiPlaying = !isAiPlaying;
+            aiToggleButton.textContent = isAiPlaying ? 'Play Against Friend' : 'Play Against AI';
+            handleReset(); // Reset the game when mode changes
+            // If AI is playing and it's O's turn (AI is always O)
+            if (isAiPlaying && currentPlayer === 'O') {
+                setTimeout(handleAiMove, 500);
+            }
+        }
+
+        // Updates the status message displayed to the user
+        function updateStatusMessage(message) {
+            statusMessage.textContent = message;
+        }
+
+        // Handles a player's click on a cell
+        function handleCellClick(event) {
+            const clickedCell = event.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+            // Check if the cell is already played, if the game is over, or if it's the AI's turn
+            if (board[clickedCellIndex] !== '' || !gameActive || (isAiPlaying && currentPlayer === 'O')) {
+                return;
+            }
+
+            // Update the board and the UI
+            board[clickedCellIndex] = currentPlayer;
+            clickedCell.textContent = currentPlayer;
+            clickedCell.classList.add(currentPlayer.toLowerCase());
+
+            // Check for a winner or a draw
+            checkResult();
+        }
+
+        // Checks for a win or a draw
+        function checkResult() {
+            let roundWon = false;
+            for (let i = 0; i < winningConditions.length; i++) {
+                const winCondition = winningConditions[i];
+                let a = board[winCondition[0]];
+                let b = board[winCondition[1]];
+                let c = board[winCondition[2]];
+
+                // If any of the positions are empty, continue to the next condition
+                if (a === '' || b === '' || c === '') {
+                    continue;
+                }
+                
+                // If all three match, a player has won
+                if (a === b && b === c) {
+                    roundWon = true;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                // Increment score for the winning player
+                if (currentPlayer === 'X') {
+                    xWins++;
+                } else {
+                    oWins++;
+                }
+                updateStatusMessage(currentPlayer === 'X' ? 'Adrija has won!' : 'O has won!');
+                gameActive = false;
+                updateScores(); // Update the dashboard
+                return;
+            }
+
+            // Check for a draw (if all cells are filled and no one has won)
+            let roundDraw = !board.includes('');
+            if (roundDraw) {
+                draws++; // Increment draw count
+                updateStatusMessage('Game is a draw!');
+                gameActive = false;
+                updateScores(); // Update the dashboard
+                return;
+            }
+
+            // Switch to the next player's turn
+            switchPlayer();
+        }
+
+        // Switches the current player and triggers AI move if applicable
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            updateStatusMessage(currentPlayer === 'X' ? 'Adrija\'s turn' : 'O\'s turn');
+
+            // If AI is playing and it's now O's turn, trigger the AI move
+            if (isAiPlaying && currentPlayer === 'O') {
+                setTimeout(handleAiMove, 500); // Add a small delay for a better user experience
+            }
+        }
+
+        // AI logic (O player)
+        function handleAiMove() {
+            // Find a winning move for AI (O)
+            let move = findWinningMove('O');
+            if (move === null) {
+                // Find a move to block the human player (X) from winning
+                move = findWinningMove('X');
+            }
+            if (move === null) {
+                // Take the center square if available
+                if (board[4] === '') {
+                    move = 4;
+                }
+            }
+            if (move === null) {
+                // Take a corner if available
+                const corners = [0, 2, 6, 8];
+                const availableCorners = corners.filter(index => board[index] === '');
+                if (availableCorners.length > 0) {
+                    move = availableCorners[Math.floor(Math.random() * availableCorners.length)];
+                }
+            }
+            if (move === null) {
+                // Take any remaining empty cell
+                const emptyCells = board.map((cell, index) => cell === '' ? index : null).filter(val => val !== null);
+                move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            }
+
+            // If a valid move was found, simulate a click
+            if (move !== null && gameActive) {
+                const cell = document.querySelector(`.cell[data-index="${move}"]`);
+                if (cell) {
+                    board[move] = 'O';
+                    cell.textContent = 'O';
+                    cell.classList.add('o');
+                    checkResult();
+                }
+            }
+        }
+
+        // Helper function to find a winning move for a given player
+        function findWinningMove(player) {
+            for (const condition of winningConditions) {
+                const [a, b, c] = condition;
+                // Create a temporary board to check winning scenarios
+                const tempBoard = [...board];
+                // Check if one move can win the game
+                if (tempBoard[a] === player && tempBoard[b] === player && tempBoard[c] === '') return c;
+                if (tempBoard[a] === player && tempBoard[c] === player && tempBoard[b] === '') return b;
+                if (tempBoard[b] === player && tempBoard[c] === player && tempBoard[a] === '') return a;
+            }
+            return null;
+        }
+
+        // Resets the game to its initial state
+        function handleReset() {
+            gameActive = true;
+            currentPlayer = 'X';
+            board.fill('');
+            updateStatusMessage(`Adrija's turn`);
+
+            // Clear the cells on the UI
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o');
+            });
+        }
+    </script>
+</body>
+</html>
